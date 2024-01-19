@@ -11,7 +11,7 @@
 #define PWM_FREQUENCY 4000
 
 //current sensing
-#define c_in 2 // Higher voltage for current sensor
+#define c_in 35 // Higher voltage for current sensor
 #define c_out 36 // Lower voltage for current sensor
 
 //input constants
@@ -36,9 +36,9 @@ int setPoint = 0;
 long prev_T  = 0;
 
 //PID Gains (could also be placed inside the void loop)
-float Kp = 6; 
-float Ki = .001; 
-float Kd = .4; 
+float Kp = 6;
+float Ki = .001;
+float Kd = .4;
 
 // Parameters for the sine wave
 const float amplitude = 1000.0; // Maximum deviation from the midpoint
@@ -57,7 +57,7 @@ int counter_limit = 25;
 
 //Arm state machine variables
 bool engage_arm_clench = false;
-float clench_threshold_value = 80; // right? 
+float clench_threshold_value = 80; // right?
 bool clench_state = false;
 
 int go = 0;
@@ -98,56 +98,56 @@ void setup() {
   ledcSetup(PWM_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
   ledcAttachPin(PWM, PWM_CHANNEL);
 
-//moving average buffer instance
+  //moving average buffer instance
   for (int i = 0; i < bufferSize; i++) {
-  buffer[i] = 0;
+    buffer[i] = 0;
   }
 
-  attachInterrupt(digitalPinToInterrupt(m1_encA),incrementEncoder, RISING);
+  attachInterrupt(digitalPinToInterrupt(m1_encA), incrementEncoder, RISING);
 }
 
 void loop() {
-     //output stuffs
-     long currentTime = micros();
-     //int setPoint = (int) getSetPoint(currentTime);
+  //output stuffs
+  long currentTime = micros();
+  //int setPoint = (int) getSetPoint(currentTime);
 
-     int buttonVal = digitalRead(button);
-     //if ((buttonVal) && (!currentLimitTriggered)){
-     if (buttonVal == HIGH){
-      setPoint = 1000;
-     }
-     else if (buttonVal == LOW){
-      setPoint = 0;
-     }
+  int buttonVal = digitalRead(button);
+  //if ((buttonVal) && (!currentLimitTriggered)){
+  if (buttonVal == HIGH) {
+    setPoint = 1000;
+  }
+  else if (buttonVal == LOW) {
+    setPoint = 0;
+  }
 
-     //Serial.print("sine: ");
-     //Serial.print(setPoint);
-     //Serial.print(" ");
-     motor(setPoint,pos1);
+  //Serial.print("sine: ");
+  //Serial.print(setPoint);
+  //Serial.print(" ");
+  motor(setPoint, pos1);
 
-     // input stuffs
-     float sensor_value = analogRead(INPUT_PIN);
-     update_boxcar(sensor_value);
+  // input stuffs
+  float sensor_value = analogRead(INPUT_PIN);
+  update_boxcar(sensor_value);
 
-     // Serial.println(average);
+  // Serial.println(average);
 
-     delay(10); 
+  delay(10);
 
-    //XOR whether or not sensor reading is above threshold value, with saved clench_state.
-    //If the state machine thinks its below the threshold (clench_state is false) and the value is above, set clench_state to be true. Rising edge, so engage arm.
-    //If the machine thinks its above the threshold (clench_state is true) and the value is below, set clench_state to be true. Falling edge, so do nothing else.
-    //If the machine is right about being on either edge of the threshold (clench_sate is in agreement with the threshold), do nothing.
+  //XOR whether or not sensor reading is above threshold value, with saved clench_state.
+  //If the state machine thinks its below the threshold (clench_state is false) and the value is above, set clench_state to be true. Rising edge, so engage arm.
+  //If the machine thinks its above the threshold (clench_state is true) and the value is below, set clench_state to be true. Falling edge, so do nothing else.
+  //If the machine is right about being on either edge of the threshold (clench_sate is in agreement with the threshold), do nothing.
 
-  if((average>clench_threshold_value)^clench_state){ 
+  if ((average > clench_threshold_value)^clench_state) {
     clench_state = !clench_state;
-    if(clench_state || buttonVal){
+    if (clench_state || buttonVal) {
       engage_arm_clench = !engage_arm_clench;
     }
   }
-  
+
   digitalWrite(LED, clench_state);
-//-------------------------------------------------
-  //current sensing 
+  //-------------------------------------------------
+  //current sensing
   float c_before = analogRead(c_in) * 3.3 / 4095;
   float c_after = analogRead(c_out) * 3.3 / 4095;
   float v_diff = c_before - c_after;
@@ -161,36 +161,36 @@ void loop() {
 
   // Check threshold
   thresholdTriggered = (movingAverage > threshold);
-  if (thresholdTriggered){
+  if (thresholdTriggered) {
     //dir = 0;
   }
 
-  // Print values for debugging
-  //Serial.print("Moving Average: ");
-  // Serial.print(v_diff);
-  // Serial.print(",");
-  //Serial.print(movingAverage);
-  //Serial.print(" Threshold Triggered: ");
-  //Serial.print(",");
-  //Serial.println(thresholdTriggered);
-
-  // Serial.print(digitalRead(m1_encB));
-  // Serial.print(",");
-  // Serial.print(digitalRead(m1_encA));
-  // Serial.print(",");
-  // Serial.println(pos1);
-
-  // Serial.print(thresholdTriggered*500);
-  // Serial.print(",");
-  // Serial.println(currentDelayCount);
-
-  Serial.print(c_before);
-  Serial.print(',');
-  Serial.println(c_after);
+// Print values for debugging
+  Serial.print("Moving Average: ");
+  Serial.println(v_diff);
+//  Serial.print(",");
+//  Serial.print(movingAverage);
+//  Serial.print(" Threshold Triggered: ");
+//  Serial.print(",");
+//  Serial.println(thresholdTriggered);
+//
+//  Serial.print(digitalRead(m1_encB));
+//  Serial.print(",");
+//  Serial.print(digitalRead(m1_encA));
+//  Serial.print(",");
+//  Serial.println(pos1);
+//
+//  Serial.print(thresholdTriggered*500);
+//  Serial.print(",");
+//  Serial.println(currentDelayCount);
+//
+//  Serial.print(c_before);
+//  Serial.print(',');
+//  Serial.println(c_after);
 }
 
 void Motor_pwr(int dir, int PWM_val, int PWM_pin, int in1, int in2) {
-  
+
   ledcWrite(PWM_CHANNEL, PWM_val); // Use ledcWrite for ESP32 PWM
 
   // if ((dir == 1) && (thresholdTriggered) && (currentDelayCount > 400)){
@@ -202,19 +202,19 @@ void Motor_pwr(int dir, int PWM_val, int PWM_pin, int in1, int in2) {
   //   currentLimitTriggered = 0;
   // }
 
-  if(dir == 1) {
-    digitalWrite(in1,HIGH);
-    digitalWrite(in2,LOW);
+  if (dir == 1) {
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
     //Serial.print("frwd");
   }
-  else if(dir == -1){
-    digitalWrite(in2,HIGH);
-    digitalWrite(in1,LOW);
+  else if (dir == -1) {
+    digitalWrite(in2, HIGH);
+    digitalWrite(in1, LOW);
     //Serial.print("back");
   }
-  else if(dir == 0){
-    digitalWrite(in2,HIGH);
-    digitalWrite(in1,HIGH);
+  else if (dir == 0) {
+    digitalWrite(in2, HIGH);
+    digitalWrite(in1, HIGH);
     //Serial.print("stall");
   }
 }
@@ -228,21 +228,21 @@ float getSetPoint(long currentTime) {
 void incrementEncoder() {
   pos1 = pos1 + dir;
 
-  if (dir == 1){
+  if (dir == 1) {
     currentDelayCount++;
   }
-  else{
+  else {
     currentDelayCount = 0;
   }
 }
 void motor(int targ, int pos) {
   long current_T = micros();
-  float delta_T = ((float)(current_T - prev_T))/1.0e6;
+  float delta_T = ((float)(current_T - prev_T)) / 1.0e6;
   prev_T = current_T;
-  
+
   static float ep = 0;
   static float ei = 0;
-  
+
   float err = targ - pos;
   float derivative = (err - ep) / delta_T;
   float integral = ei + (err * delta_T);
@@ -256,7 +256,7 @@ void motor(int targ, int pos) {
   }
 
   dir = 1;
-  if(output < targ) {
+  if (output < targ) {
     dir = -1;
   }
 
@@ -264,7 +264,7 @@ void motor(int targ, int pos) {
   //Serial.print(dir);
 
   Motor_pwr(dir, pwr, PWM, IN1, IN2);
-  
+
   ep = err;
 }
 
@@ -274,29 +274,29 @@ float EMGFilter(float input)
   float output = input;
   {
     static float z1, z2; // filter section state
-    float x = output - 0.05159732*z1 - 0.36347401*z2;
-    output = 0.01856301*x + 0.03712602*z1 + 0.01856301*z2;
+    float x = output - 0.05159732 * z1 - 0.36347401 * z2;
+    output = 0.01856301 * x + 0.03712602 * z1 + 0.01856301 * z2;
     z2 = z1;
     z1 = x;
   }
   {
     static float z1, z2; // filter section state
-    float x = output - -0.53945795*z1 - 0.39764934*z2;
-    output = 1.00000000*x + -2.00000000*z1 + 1.00000000*z2;
+    float x = output - -0.53945795 * z1 - 0.39764934 * z2;
+    output = 1.00000000 * x + -2.00000000 * z1 + 1.00000000 * z2;
     z2 = z1;
     z1 = x;
   }
   {
     static float z1, z2; // filter section state
-    float x = output - 0.47319594*z1 - 0.70744137*z2;
-    output = 1.00000000*x + 2.00000000*z1 + 1.00000000*z2;
+    float x = output - 0.47319594 * z1 - 0.70744137 * z2;
+    output = 1.00000000 * x + 2.00000000 * z1 + 1.00000000 * z2;
     z2 = z1;
     z1 = x;
   }
   {
     static float z1, z2; // filter section state
-    float x = output - -1.00211112*z1 - 0.74520226*z2;
-    output = 1.00000000*x + -2.00000000*z1 + 1.00000000*z2;
+    float x = output - -1.00211112 * z1 - 0.74520226 * z2;
+    output = 1.00000000 * x + -2.00000000 * z1 + 1.00000000 * z2;
     z2 = z1;
     z1 = x;
   }
