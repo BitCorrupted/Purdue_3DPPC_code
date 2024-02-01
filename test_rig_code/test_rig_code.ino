@@ -73,7 +73,15 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
+  /* Initializing LEDS */
+  pinMode(LEDA, OUTPUT);
+  pinMode(LEDB, OUTPUT);
+  pinMode(LEDC, OUTPUT);
+  pinMode(SWITCH, INPUT);
 
+  //power led
+  digitalWrite(LEDA, HIGH);
+  
   /* Initializing sd Card */
   //Serial.print("Initializing SD card...");
 
@@ -84,15 +92,6 @@ void setup() {
     while (1);
   }
   //Serial.println("card initialized.");
-
-  /* Initializing LEDS */
-  pinMode(LEDA, OUTPUT);
-  pinMode(LEDB, OUTPUT);
-  pinMode(LEDC, OUTPUT);
-  pinMode(SWITCH, INPUT);
-
-  //power led
-  digitalWrite(LEDA, HIGH);
 }
 
 void loop() {
