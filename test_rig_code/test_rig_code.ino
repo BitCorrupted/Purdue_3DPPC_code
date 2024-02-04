@@ -123,7 +123,7 @@ void loop() {
     digitalWrite(LEDC, HIGH);
     File dataFile = SD.open(base_name, FILE_WRITE);
     if (dataFile) {
-      dataFile.println("\nBegin test " + String(test_number) + " of session. Sample delay is " + String(sample_delay));
+      dataFile.println("\nBeginning to record data. Sample delay is " + String(sample_delay));
       dataFile.close();
     }
   }
@@ -140,7 +140,7 @@ void loop() {
 
     File dataFile = SD.open(base_name, FILE_WRITE);
 
-    String dataString = String(average) + "," + "," + String(sensor_value) + "," + String(clench_state) + "," + String(clench_threshold_value);
+    String dataString = "Average: " + String(average) + ", Sensor Value: " + String(sensor_value) + ", Clench State: " + String(clench_state) + ", Clench Threshold Value: " + String(clench_threshold_value);
     // if the file is available, write to it:
     if (dataFile) {
       dataFile.println(dataString);
