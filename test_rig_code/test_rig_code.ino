@@ -24,7 +24,7 @@
 const int chipSelect = 10;
 
 //general parameters
-#define div_constant 10
+#define div_constant 5
 #define SAMPLE_RATE 500
 #define BAUD_RATE 9600
 #define INPUT_PIN A0
