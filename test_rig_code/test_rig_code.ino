@@ -36,7 +36,6 @@ const int chipSelect = 10;
 #define LEDC 3
 #define sample_delay 35 // milis delay in main loop
 
-
 //Boxcar averager (for smooth EMG reading)
 int bcsum = 0;
 int boxcar[CAR_SIZE];
@@ -140,7 +139,7 @@ void loop() {
 
     File dataFile = SD.open(base_name, FILE_WRITE);
 
-    String dataString = "Average: " + String(average) + ", Sensor Value: " + String(sensor_value) + ", Clench State: " + String(clench_state) + ", Clench Threshold Value: " + String(clench_threshold_value);
+    String dataString = "Time: " + String(millis()) + ", Average: " + String(average) + ", Sensor Value: " + String(sensor_value) + ", Clench State: " + String(clench_state) + ", Clench Threshold Value: " + String(clench_threshold_value);
     // if the file is available, write to it:
     if (dataFile) {
       dataFile.println(dataString);

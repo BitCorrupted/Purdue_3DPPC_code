@@ -124,7 +124,7 @@ void loop() {
   //Serial.print(setPoint);
   //Serial.print(" ");
   motor(setPoint, pos1);
-
+  
   // input stuffs
   float sensor_value = analogRead(INPUT_PIN);
   update_boxcar(sensor_value);
@@ -260,6 +260,7 @@ void motor(int targ, int pos) {
     dir = -1;
   }
 
+  
   //Serial.print(" ");
   //Serial.print(dir);
 
